@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // PHASE P1.2: Server-only access via dedicated Email/Password server user UID.
+    // All unauthenticated requests and all other UIDs/providers are denied.
+    match /{document=**} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == 'uPep4vuatUOTt5qPDtYdcYVDccO2'
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+  }
+}

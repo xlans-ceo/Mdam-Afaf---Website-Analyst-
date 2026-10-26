@@ -1,0 +1,267 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #FAF5EC;
+  --surface: #FFFFFF;
+  --surface-alt: #F1E9DB;
+  --ink: #231C16;
+  --ink-muted: #5E5348;
+  --border: #DDD2C0;
+  --border-strong: #8C7F6F;
+  --primary: #0B5D5E;
+  --primary-hover: #084647;
+  --on-primary: #FFFFFF;
+  --pen: #8E1B12;
+  --sev-critical-bg: #FDE8E6;
+  --sev-critical-fg: #8E1B12;
+  --sev-high-bg: #FDEDE6;
+  --sev-high-fg: #A8321A;
+  --sev-medium-bg: #FFF1D0;
+  --sev-medium-fg: #7A4F00;
+  --sev-low-bg: #E6EEF8;
+  --sev-low-fg: #1D4E89;
+  --pass-bg: #E4F3E8;
+  --pass-fg: #1F6B3A;
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --sh-1: 0 1px 2px rgba(35, 28, 22, 0.08);
+  --sh-2: 0 4px 12px rgba(35, 28, 22, 0.10);
+  --sh-3: 0 12px 32px rgba(35, 28, 22, 0.16);
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sticky-offset: 3rem;
+  --sticky-offset-2: 6rem;
+  --font: 'IBM Plex Sans Arabic', system-ui, 'Segoe UI', Tahoma, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Consolas, monospace;
+}
+
+@theme {
+  --font-sans: var(--font);
+  --font-mono: var(--mono);
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.7;
+    letter-spacing: 0 !important;
+    font-style: normal !important;
+    hyphens: none;
+    -webkit-hyphens: none;
+    word-break: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font);
+    line-height: 1.35;
+    text-wrap: balance;
+    hyphens: none;
+    letter-spacing: 0 !important;
+    font-style: normal !important;
+  }
+
+  p {
+    text-wrap: pretty;
+    hyphens: none;
+    line-height: 1.7;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font);
+    letter-spacing: 0 !important;
+    font-style: normal !important;
+  }
+
+  code,
+  pre,
+  .font-mono,
+  .afaf-url-wrap {
+    font-family: var(--mono);
+    overflow-wrap: anywhere;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}
+
+/* J2.1 Sticky Accordion Headers */
+.afaf-sticky-accordion-header {
+  position: sticky;
+  top: var(--sticky-offset);
+  z-index: 10;
+  min-height: 48px;
+}
+
+.afaf-sticky-nested-header {
+  position: sticky;
+  top: var(--sticky-offset-2);
+  z-index: 9;
+  min-height: 48px;
+}
+
+/* Signature Wordmark Underline (--pen 3px under عفاف) */
+.afaf-pen-underline {
+  border-block-end: 3px solid var(--pen);
+  padding-block-end: 1px;
+}
+
+/* Signature Verdict Stamp: rounded block with double border (2px + inner 1px) */
+.afaf-verdict-stamp {
+  border-radius: var(--r-md);
+  border-width: 2px;
+  border-style: solid;
+  box-shadow: inset 0 0 0 2px var(--surface), inset 0 0 0 3px currentColor;
+}
+
+/* Signature Finding Card: 4px inline-start border in severity color */
+.afaf-finding-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-inline-start-width: 4px;
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+}
+
+.bg-window-six-luxury {
+  background-color: var(--bg);
+}
+
+/* B2.2 Dock: macOS-like magnification on desktop (@media (hover: hover)) & bounce on activation */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .madam-dock-item {
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease;
+    transform-origin: bottom center;
+  }
+
+  .madam-dock-item.madam-dock-hovered {
+    transform: translateY(-4px) scale(1.16);
+    z-index: 2;
+  }
+
+  .madam-dock-item.madam-dock-neighbor {
+    transform: translateY(-2px) scale(1.07);
+    z-index: 1;
+  }
+}
+
+@keyframes madamDockBounce {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(-6px) scale(1.08);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .madam-dock-bounce {
+    animation: madamDockBounce 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print / PDF Stylesheet (Section 5: A4 with 16mm margins, expanded evidence, no chat/buttons) */
+@page {
+  size: A4;
+  margin: 16mm;
+
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-family: var(--font);
+    font-size: 9pt;
+    color: #5E5348;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #FFFFFF !important;
+    color: #231C16 !important;
+    font-size: 11pt;
+    line-height: 1.55;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .evidence-collapse {
+    display: block !important;
+  }
+
+  .afaf-finding-card,
+  .evidence-block,
+  .avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-family: var(--mono);
+    font-size: 9pt;
+    color: #5E5348;
+    direction: ltr;
+    unicode-bidi: isolate;
+    word-break: break-all;
+  }
+
+  pre,
+  code {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+}

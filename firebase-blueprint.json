@@ -1,0 +1,94 @@
+{
+  "entities": {
+    "ScanJob": {
+      "title": "ScanJob",
+      "description": "Server-managed scan job state and queue position",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "schemaVersion": { "type": "integer" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "schemaVersion", "status"]
+    },
+    "ScanReport": {
+      "title": "ScanReport",
+      "description": "Server-managed website review report (capped below 1 MiB)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "schemaVersion": { "type": "integer" },
+        "domain": { "type": "string" }
+      },
+      "required": ["id", "schemaVersion", "domain"]
+    },
+    "DomainQuota": {
+      "title": "DomainQuota",
+      "description": "Server-managed visitor domain lock and scan quota reservation",
+      "type": "object",
+      "properties": {
+        "visitorIdHash": { "type": "string" },
+        "lockedDomain": { "type": "string" },
+        "scansUsed": { "type": "integer" },
+        "scansReserved": { "type": "integer" }
+      },
+      "required": ["visitorIdHash", "lockedDomain", "scansUsed"]
+    },
+    "ReportShare": {
+      "title": "ReportShare",
+      "description": "Server-managed hashed share token record",
+      "type": "object",
+      "properties": {
+        "tokenHash": { "type": "string" },
+        "scanId": { "type": "string" }
+      },
+      "required": ["tokenHash", "scanId"]
+    },
+    "RuleFeedback": {
+      "title": "RuleFeedback",
+      "description": "Server-managed per-finding accuracy feedback",
+      "type": "object",
+      "properties": {
+        "scanId": { "type": "string" },
+        "ruleId": { "type": "string" }
+      },
+      "required": ["scanId", "ruleId"]
+    },
+    "Tombstone": {
+      "title": "Tombstone",
+      "description": "Server-managed deletion/expiration tombstone record",
+      "type": "object",
+      "properties": {
+        "scanId": { "type": "string" },
+        "reason": { "type": "string" }
+      },
+      "required": ["scanId", "reason"]
+    }
+  },
+  "firestore": {
+    "/jobs/{scanId}": {
+      "schema": { "$ref": "#/entities/ScanJob" },
+      "description": "Server-only scan jobs collection (client rules deny-all)"
+    },
+    "/reports/{scanId}": {
+      "schema": { "$ref": "#/entities/ScanReport" },
+      "description": "Server-only scan reports collection (client rules deny-all)"
+    },
+    "/quotas/{visitorHash_domain}": {
+      "schema": { "$ref": "#/entities/DomainQuota" },
+      "description": "Server-only quota locks collection (client rules deny-all)"
+    },
+    "/shares/{tokenHash}": {
+      "schema": { "$ref": "#/entities/ReportShare" },
+      "description": "Server-only share tokens collection (client rules deny-all)"
+    },
+    "/feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/RuleFeedback" },
+      "description": "Server-only rule feedback collection (client rules deny-all)"
+    },
+    "/tombstones/{scanId}": {
+      "schema": { "$ref": "#/entities/Tombstone" },
+      "description": "Server-only tombstones collection (client rules deny-all)"
+    }
+  }
+}

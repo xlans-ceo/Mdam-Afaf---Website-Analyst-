@@ -1,0 +1,7 @@
+{
+  "name": "Madam Afaf - AI Website Reviewer",
+  "description": "مراجعة احترافية للمواقع الإلكترونية باللغة العربية مع مدام عفاف - فحص دقيق للواجهة، الصفحات، والتفاعل، وإنشاء أوامر إصلاح فورية",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

@@ -1,0 +1,864 @@
+# Production-Ready MVP — AI Website Reviewer (Madam Afaf)
+
+## 1. Mission
+
+Act as a senior full-stack engineer, browser automation engineer, application security engineer, and product designer.
+
+Build a complete, working, production-minded MVP of an AI website reviewer for non-technical users who build websites with AI tools or need to review a website before accepting it from a developer or agency.
+
+The product uses a friendly, meticulous Egyptian Arabic character, temporarily named "Madam Afaf" (مدام عفاف).
+
+Users submit a public website URL. The application examines the frontend, identifies real and actionable problems, explains findings in simple Egyptian Arabic, prioritizes them, and generates a repair prompt that can be copied into any AI coding tool or given to a human developer.
+
+This is not an enterprise QA platform, website builder, penetration-testing tool, or autonomous code repair agent.
+
+**Build the actual application, not just a plan, mockup, or starter template.** Inspect the existing repository first, reuse useful code, implement the requirements, run tests, fix discovered problems, and document deployment.
+
+Do not claim production readiness unless the required implementation, testing, and security work have actually been completed.
+
+## 2. Non-Negotiable Product Rules
+
+1. Public websites only. No login or authentication flows on target websites in the MVP.
+2. No bypassing CAPTCHA, bot protection, access controls, or authentication.
+3. No voice features in the first release.
+4. One configurable GLM model for AI conversations and report generation.
+5. Playwright for browser behavior and interaction checks.
+6. Lighthouse for performance and basic SEO auditing.
+7. Standard websites: maximum 10 meaningful pages per website domain per scan.
+8. Small and medium e-commerce websites: maximum 20 meaningful pages per website domain per scan.
+9. Product filters, sorting, pagination states, product variants, and AJAX updates do not consume additional page slots merely because the URL or content state changes.
+10. Detect potentially large e-commerce stores early. If a store exceeds the configured large-store thresholds, show a clear unsupported-store notice and do not perform a deep crawl.
+11. Each anonymous visitor can scan 10 distinct website domains per rolling 9-hour window by default.
+12. The same domain cannot be scanned again by the same visitor within the active window. Existing reports remain accessible.
+13. The free quota, window duration, page limits, concurrency, and emergency shutdown must be configurable.
+14. No automatic code changes to target websites.
+15. Every reported defect must have supporting evidence or a reproducible deterministic check. Never invent findings.
+
+## 3. Technology Stack
+
+Use a maintainable TypeScript architecture:
+
+- Frontend: Next.js App Router, React, TypeScript.
+- Styling: Tailwind CSS and accessible components.
+- UI language: Egyptian Arabic, with correct RTL layout.
+- Backend: Next.js server-side API routes.
+- Database: PostgreSQL with Prisma and migrations.
+- Background jobs: Redis and BullMQ.
+- Browser automation: Playwright with Chromium.
+- Performance and SEO: Lighthouse CLI.
+- AI: one configurable GLM model.
+- Validation: Zod.
+- Tests: Vitest and Playwright end-to-end tests.
+- Deployment: Docker Compose with separate application and browser-worker services.
+
+Use compatible, supported dependency versions. Keep the AI provider replaceable through a small adapter.
+
+Do not build an unnecessarily complex microservice architecture. However, run browser jobs in a separate, isolated worker rather than in public HTTP request handlers.
+
+The application must remain useful when the GLM provider is temporarily unavailable.
+
+## 4. User Experience
+
+Build a polished, responsive, Arabic RTL interface.
+
+### Landing page
+
+The user can:
+
+- Enter a public website URL.
+- Optionally describe the website's purpose.
+- Optionally identify the most important user journey.
+- Start scanning without answering questions.
+- See the remaining free domain quota.
+
+### Madam Afaf chat
+
+Use a friendly, meticulous, direct Egyptian Arabic tone.
+
+Ask one short question at a time. Offer suggested answers as clickable choices while allowing free-text responses.
+
+Example:
+
+"أهلاً بيك! هاتي لينك الموقع وأنا هراجعهولك. ولو تحب، قولي الموقع معمول علشان إيه عشان أعرف أركز على الحاجات المهمة."
+
+Suggested answers:
+
+- موقع شركة.
+- متجر إلكتروني.
+- صفحة هبوط.
+- موقع حجز أو خدمات.
+- مش متأكد، افحصيه وخلاص.
+
+The user must be able to skip all questions.
+
+Never force a lengthy questionnaire. Avoid asking for information already provided.
+
+### Scan progress
+
+Show meaningful stages such as:
+
+- فحص الرابط.
+- اكتشاف الصفحات المهمة.
+- اختبار التفاعل.
+- مراجعة الأداء وSEO.
+- تجهيز التقرير.
+
+Progress must reflect actual job state. Do not fabricate percentages or completed tasks.
+
+### Results
+
+Show the most important 3–5 findings first when available.
+
+Include:
+
+- Severity.
+- Confidence.
+- Affected page.
+- Simple Arabic explanation.
+- Reproduction steps.
+- Screenshot or other evidence when available.
+- Recommended fix.
+- Copyable repair prompt.
+- Expandable technical details.
+
+Distinguish confirmed defects, suspected issues, unverified behavior, and recommendations.
+
+Do not present a fabricated overall website quality score.
+
+## 5. Domain Identity, URL Normalization, and Page Counting
+
+Implement URL normalization and domain classification as dedicated, unit-tested modules.
+
+### Domain identity
+
+Use a maintained Public Suffix List-aware library to identify the registrable domain.
+
+Examples:
+
+- `www.example.com` and `example.com` belong to the same registrable domain.
+- Different paths on `example.com` do not count as different websites.
+- Tracking parameters do not create additional website identities.
+- Separate registrable domains count as separate websites for the free quota.
+
+Use the normalized registrable domain for quota enforcement and repeat-scan prevention.
+
+The crawler must follow a conservative same-origin policy by default. It may follow a validated redirect to a legitimate canonical hostname within the same registrable domain, but must not automatically crawl unrelated domains or arbitrary subdomains.
+
+### Define a meaningful page
+
+A meaningful page is a distinct, inspectable content page or application route that represents a real destination or content entity.
+
+Examples include:
+
+- Homepage.
+- About page.
+- Contact page.
+- A product category page.
+- A product detail page.
+- A service detail page.
+- A distinct editorial or informational page.
+
+### Pages that do NOT consume additional page slots
+
+Do not count these as additional meaningful pages merely because their URL, query parameters, or rendered content changes:
+
+- Product filters.
+- Sorting options.
+- Search filters.
+- Product variants selected on the same product page.
+- Pagination states within the same listing.
+- AJAX updates.
+- Tabs, accordions, modals, and similar interface states.
+- Tracking query parameters.
+- Repeated URLs that normalize to the same canonical content page.
+- Duplicate routes that render the same content entity.
+
+Do not blindly remove all query parameters. A query parameter can represent a genuine application route or a distinct content entity. Use canonical URLs, route structure, observed content, and known tracking/filter parameters to decide whether a destination is genuinely distinct.
+
+Maintain two separate counters:
+
+1. `unique_pages_inspected`: the number of distinct meaningful content pages inspected.
+2. `interaction_states_tested`: the number of tested interaction states, including AJAX-driven states.
+
+Interaction states must never silently inflate the meaningful-page count.
+
+Enforce the page limit at the worker level. Do not rely only on frontend validation.
+
+## 6. Standard Website Scanning Policy
+
+Default configuration:
+
+```env
+STANDARD_MAX_PAGES_PER_DOMAIN=10
+```
+
+For an ordinary website:
+
+- Inspect no more than 10 unique meaningful pages in a scan.
+- Start from the submitted homepage.
+- Discover internal links breadth-first.
+- Prioritize the homepage, primary navigation destinations, contact pages, important service pages, and primary user journeys.
+- Deduplicate canonical pages.
+- Avoid repeated routes and infinite crawl loops.
+- Do not recursively crawl external domains.
+- Do not exhaust infinite-scroll content.
+- Respect robots.txt and applicable access restrictions.
+- Use bounded timeouts, request limits, and retries.
+
+The scan must not exceed 10 meaningful pages even if the website contains hundreds of links.
+
+When the limit is reached, stop discovery and report the number of pages inspected and any uninspected areas.
+
+## 7. E-Commerce Detection and Scanning
+
+E-commerce is a separate scan profile, not simply a larger page count.
+
+### Detect e-commerce websites
+
+Use deterministic evidence where available, including:
+
+- Product and ProductGroup structured data.
+- Product detail routes.
+- Category or collection listing routes.
+- Product prices and product availability.
+- Add-to-cart controls.
+- Cart navigation.
+- Recognizable product listing patterns.
+- Relevant sitemap entries.
+
+Use multiple signals where practical. Do not classify a website as an online store merely because it contains one price or one product-like word.
+
+Store the classification and confidence in the scan record.
+
+### Small and medium e-commerce websites
+
+Default configuration:
+
+```env
+ECOMMERCE_MAX_PAGES_PER_DOMAIN=20
+```
+
+A small or medium store can have up to 20 distinct meaningful pages inspected.
+
+Prioritize a representative sample:
+
+1. Homepage.
+2. Important category or collection pages.
+3. Representative product detail pages.
+4. Important informational or contact pages.
+5. Other high-value destinations discovered through navigation.
+
+Do not spend all 20 slots on product details while ignoring categories or important navigation.
+
+Use deterministic prioritization. Prefer breadth across important page types rather than scanning many near-identical products.
+
+Product filters, sorting, pagination, and variants remain interaction states, not additional meaningful pages.
+
+### Detect large e-commerce stores early
+
+Do not attempt to crawl an entire large catalog.
+
+Use configurable preflight signals, including:
+
+- Number of distinct category or collection destinations discovered.
+- Number of distinct product URLs found in bounded sitemap inspection.
+- Number of relevant URLs declared in accessible sitemap indexes.
+- Excessive catalog depth or obvious large-catalog pagination.
+
+Initial configurable thresholds:
+
+```env
+ECOMMERCE_LARGE_STORE_CATEGORY_THRESHOLD=20
+ECOMMERCE_LARGE_STORE_PRODUCT_URL_THRESHOLD=500
+ECOMMERCE_LARGE_STORE_SITEMAP_URL_THRESHOLD=1000
+```
+
+These thresholds are conservative starting values, not absolute definitions of store size. Make them configurable and document their behavior.
+
+Inspect sitemap metadata within strict response-size and time limits. Do not download or crawl an unlimited sitemap.
+
+If a reliable signal indicates that the store exceeds a threshold:
+
+1. Mark the site as `unsupported_large_ecommerce`.
+2. Stop deep crawling.
+3. Do not attempt to inspect the full catalog.
+4. Do not consume a completed-scan quota slot for a store rejected during preflight.
+5. Preserve infrastructure rate limits to prevent repeated probing abuse.
+6. Show a clear Egyptian Arabic message.
+
+Example:
+
+"الموقع ده باين إنه متجر إلكتروني كبير وفيه تصنيفات ومنتجات كتير. حاليًا بنركز على المواقع والمتاجر الصغيرة والمتوسطة علشان نقدر نراجعها بدقة. دعم المتاجر الكبيرة هييجي في إصدار لاحق."
+
+Do not label a store as large based only on a single product or category.
+
+If the store is clearly supported, enforce the 20-page limit. If size cannot be determined confidently, do not crawl without limits; apply the 20-page cap and record the uncertainty.
+
+### E-commerce actions
+
+Never submit purchases, payments, orders, or other consequential actions.
+
+Do not create accounts, send contact messages, or trigger real external transactions.
+
+Inspect the cart and checkout interfaces only when they can be reached safely without committing a transaction. If reaching them requires unsafe actions, mark the journey as untested.
+
+Do not bypass login or bot protections.
+
+## 8. AJAX, SPA, and Dynamic Frontend Testing
+
+This is a core requirement. Implement explicit handling for asynchronous websites.
+
+Do not assume every website uses full-page navigation.
+
+### Navigation and loading
+
+- Use `DOMContentLoaded` or an appropriate navigation event as a starting point.
+- Do not rely exclusively on `networkidle`, because modern websites may maintain WebSockets, analytics requests, polling, or other persistent connections.
+- Use bounded, condition-based waits.
+- Detect relevant loading indicators when practical.
+- Wait for a specific expected UI change after an interaction.
+- Use a short, bounded DOM-stability wait only as a fallback, not as proof of correctness.
+- Apply per-action and per-page timeouts.
+- Avoid unbounded sleeps and indefinite waiting.
+
+### AJAX and dynamic interactions
+
+Where safely testable, inspect representative examples of:
+
+- Product filters.
+- Sorting.
+- Search suggestions.
+- Search result updates.
+- Tabs and accordions.
+- Modal and popup behavior.
+- Product variant selection.
+- Load-more buttons.
+- Pagination controls.
+- SPA navigation using the History API.
+- Form validation without actual submission.
+- Lazy-loaded images and content.
+
+For each interaction:
+
+1. Capture the relevant initial state.
+2. Perform a safe, reversible interaction.
+3. Wait for an observable expected change.
+4. Verify the change using DOM state, URL state, an appropriate response, or another deterministic signal.
+5. Record JavaScript errors and relevant failed requests.
+6. Restore the initial state when practical.
+7. Record the outcome and evidence.
+
+Do not classify a successful interaction as a new meaningful page solely because the query string changed.
+
+### AJAX failure detection
+
+Record potentially relevant failures such as:
+
+- A filter action that produces no expected change after a bounded wait.
+- A loading indicator that never resolves.
+- An AJAX response that fails and prevents a required interface update.
+- A JavaScript exception that demonstrably breaks an interaction.
+- A SPA route transition that fails to render the requested destination.
+
+Distinguish these from unrelated analytics errors, cancelled speculative requests, optional third-party scripts, and transient network failures.
+
+A failed request alone is not proof of a user-visible defect.
+
+### Safety
+
+Never click arbitrary buttons indiscriminately.
+
+Do not activate purchase, payment, delete, logout, send, publish, or other consequential controls.
+
+Use a small, configurable interaction budget per page. Test representative controls rather than every possible combination of filters and options.
+
+If a popup, dynamic widget, or third-party script makes an interaction unreliable, record the limitation and continue with supported checks.
+
+Do not attempt to evade anti-bot protections.
+
+## 9. Playwright Frontend Checks
+
+Implement deterministic checks for:
+
+- Navigation success and failure.
+- Broken internal links.
+- Missing or empty link destinations.
+- Broken images.
+- Relevant console errors.
+- Relevant failed network requests.
+- Basic button and link behavior.
+- Safe client-side form validation.
+- Missing or incorrect document titles.
+- Responsive overflow at defined desktop and mobile viewport sizes.
+- Obvious overlap or clipping that can be measured reliably.
+- Missing labels or other detectable accessibility issues where practical.
+
+Do not treat all console errors as confirmed user-facing defects.
+
+Do not assume a button is broken simply because its click produces no obvious visual change. Validate against a known expected outcome or a deterministic behavior signal.
+
+Do not claim to verify backend business logic, database state, real email delivery, payment processing, or server-side persistence.
+
+For every finding, distinguish what was observed from what is inferred.
+
+## 10. Lighthouse Performance and SEO
+
+Use local Lighthouse as the default audit engine.
+
+Run Lighthouse on the homepage and a configurable number of important pages, with a default maximum of three pages per scan.
+
+Example:
+
+```env
+LIGHTHOUSE_MAX_PAGES=3
+LIGHTHOUSE_MOBILE_FIRST=true
+```
+
+Collect real measurements and individual audit results for:
+
+- Performance.
+- Basic SEO.
+- Relevant page metadata.
+- Indexability signals.
+- Other applicable deterministic Lighthouse audits.
+
+Where supported, retain relevant Core Web Vitals estimates and audit details.
+
+Distinguish lab measurements from field data. Do not claim that a local Lighthouse run represents actual user experience across all devices and networks.
+
+Do not invent scores.
+
+Do not require PageSpeed Insights API access for the MVP. Keep the audit interface modular so that PageSpeed Insights can be added later.
+
+Do not run unlimited Lighthouse jobs concurrently. Apply worker and global concurrency limits.
+
+## 11. Finding Schema and Prioritization
+
+Every finding must include:
+
+- Stable finding ID.
+- Category.
+- Title.
+- Plain-language explanation.
+- Severity.
+- Confidence.
+- Affected URL.
+- Reproduction steps when applicable.
+- Evidence references.
+- Observed behavior.
+- Expected behavior only when justified.
+- Recommended fix.
+- Source of evidence.
+- Whether it is a confirmed defect, suspected issue, unverified behavior, or recommendation.
+
+Use these severities:
+
+- `critical`: a confirmed issue blocks a core user journey.
+- `high`: a confirmed issue materially affects important functionality.
+- `medium`: a confirmed issue affects a meaningful but limited part of the experience.
+- `low`: a minor confirmed defect.
+- `improvement`: a recommendation, not a confirmed defect.
+
+Use these confidence statuses:
+
+- `confirmed`
+- `likely`
+- `unverified`
+
+Never treat an absent feature as a defect unless its requirement is known or a valid deterministic rule establishes the issue.
+
+Prioritize user impact, not cosmetic visibility.
+
+Deduplicate repeated manifestations of the same underlying issue.
+
+Do not produce an arbitrary overall website score.
+
+## 12. GLM Integration
+
+Use one configurable GLM model for:
+
+- Optional requirement-gathering conversation.
+- Explaining deterministic findings in Egyptian Arabic.
+- Summarizing the most important issues.
+- Suggesting severity when evidence supports it.
+- Generating repair prompts.
+
+Configuration:
+
+```env
+GLM_API_KEY=
+GLM_BASE_URL=
+GLM_MODEL=
+```
+
+Use the official documented API protocol for the selected provider. Do not invent endpoints or model identifiers.
+
+Keep API keys on the server.
+
+Validate model output with Zod. Retry malformed output at most once, then fall back to deterministic reporting.
+
+The model must not invent findings, evidence, screenshots, test results, or performance scores.
+
+If the model is unavailable, display deterministic findings and an appropriate warning. Do not fail an otherwise useful scan merely because AI analysis failed.
+
+Implement bounded token usage, request limits, retry limits, and provider error handling.
+
+Do not assume that API usage will remain free.
+
+## 13. Repair Prompt Generation
+
+Generate:
+
+1. A master repair prompt containing the prioritized actionable findings.
+2. Optional individual prompts for specific findings.
+
+Each prompt must include:
+
+- Website purpose, if supplied.
+- Affected URLs.
+- Reproduction steps.
+- Actual observed behavior.
+- Expected behavior where justified.
+- Supporting evidence.
+- Recommended changes.
+- Instructions to inspect the existing implementation before editing.
+- Instructions to make minimal, targeted changes.
+- Instructions to preserve the existing framework, design system, routes, and unrelated functionality.
+- Instructions to avoid unnecessary dependencies and redesigns.
+- Instructions to test the correction and check for regressions.
+- A requirement to report changed files and unresolved limitations.
+
+The prompt must work with different AI coding tools or a human developer.
+
+Do not hardcode a dependency on Lovable, Bolt, Replit, Claude, or another specific builder.
+
+Provide a one-click copy button and clear Arabic confirmation.
+
+Do not automatically send the prompt to an external service or modify the website.
+
+## 14. Free Quota and Domain Limits
+
+Default configuration:
+
+```env
+FREE_SCANS_ENABLED=true
+FREE_SCANS_PER_WINDOW=10
+FREE_SCAN_WINDOW_HOURS=9
+STANDARD_MAX_PAGES_PER_DOMAIN=10
+ECOMMERCE_MAX_PAGES_PER_DOMAIN=20
+MAX_CONCURRENT_SCANS_PER_VISITOR=1
+MAX_CONCURRENT_SCANS_GLOBAL=3
+SCAN_TIMEOUT_SECONDS=180
+REPORT_RETENTION_DAYS=30
+ARTIFACT_RETENTION_DAYS=7
+FREE_SCANS_HARD_DISABLED=false
+```
+
+The limits have distinct meanings:
+
+- `FREE_SCANS_PER_WINDOW`: number of distinct registrable domains a visitor may successfully scan.
+- `FREE_SCAN_WINDOW_HOURS`: rolling time window for the quota.
+- `STANDARD_MAX_PAGES_PER_DOMAIN`: meaningful page limit for a standard website.
+- `ECOMMERCE_MAX_PAGES_PER_DOMAIN`: meaningful page limit for a supported small or medium e-commerce website.
+
+Do not conflate domain quota with page quota.
+
+### Visitor identity
+
+Use a cryptographically random anonymous visitor token in a signed, HttpOnly, SameSite cookie. Set Secure in production.
+
+Store a secure server-side identifier derived from the token.
+
+Do not rely on localStorage or frontend checks alone.
+
+Add IP-based rate limiting as a secondary abuse-control measure. Respect privacy and avoid invasive fingerprinting.
+
+Anonymous quotas are best-effort; clearly document that clearing cookies or using another device can bypass them.
+
+Keep the design compatible with adding authenticated accounts later.
+
+### Quota behavior
+
+- A visitor can successfully scan up to 10 distinct registrable domains per rolling 9-hour window.
+- A domain already scanned by that visitor cannot be scanned again within the active window.
+- The same domain cannot consume multiple slots through different paths, tracking parameters, or common hostname variations.
+- Opening an existing report does not consume another slot.
+- Product filters and other interaction states never consume separate domain slots.
+- A large e-commerce site rejected during preflight does not consume a completed-scan quota slot.
+- An infrastructure failure before the scan actually starts releases its reservation.
+- A genuine scan that starts and then encounters target-site limitations is handled consistently according to a documented quota policy.
+- Concurrent requests must not bypass the quota.
+
+Use atomic database transactions or an equivalent safe reservation mechanism.
+
+Display the remaining quota and its reset time.
+
+### Centralized configuration
+
+All quotas and page limits must be controlled by a single configuration service, not scattered magic numbers.
+
+Support:
+
+1. Environment configuration for initial deployment and emergency controls.
+2. Protected runtime admin settings for changing quota values without rebuilding the application.
+
+If environment variables require a restart to take effect, document that behavior accurately.
+
+### Emergency shutdown
+
+Implement both:
+
+- A protected admin control to disable new scans.
+- An environment-level override: `FREE_SCANS_HARD_DISABLED=true`.
+
+When the hard-disable override is enabled, reject new scan requests regardless of the admin database setting.
+
+Existing reports remain accessible.
+
+Display a clear message that new scans are temporarily unavailable.
+
+Add global concurrency limits, bounded queues, job timeouts, and bounded retries.
+
+## 15. E-Commerce and Page-Limit Configuration
+
+The admin settings screen should expose:
+
+- Standard website page limit.
+- E-commerce page limit.
+- E-commerce category threshold.
+- E-commerce product URL threshold.
+- E-commerce sitemap URL threshold.
+- Lighthouse page limit.
+- Free scans per window.
+- Window duration.
+- Global concurrency.
+- Enable/disable scanning.
+
+Validate all values on the server.
+
+The worker must enforce the active settings during execution.
+
+Changing a setting must not require source-code edits or a full application rebuild. Use a centralized runtime configuration service with validated defaults.
+
+The emergency environment override must always take precedence.
+
+## 16. Security Requirements
+
+Security is mandatory before public deployment.
+
+The scanner accepts user-provided URLs and therefore requires strict SSRF protection.
+
+Implement:
+
+- HTTP/HTTPS scheme allowlisting.
+- Rejection of credentials embedded in URLs.
+- Rejection of localhost, loopback, private, link-local, reserved, and cloud metadata IP addresses.
+- IPv4 and IPv6 validation.
+- DNS resolution checks.
+- Redirect and subresource validation.
+- Protection against DNS rebinding and time-of-check/time-of-use issues.
+- Network egress restrictions at the worker or infrastructure level.
+- No access to internal infrastructure services or cloud credentials.
+- No arbitrary filesystem access from the browser worker.
+- Response-size, runtime, depth, page-count, and concurrency limits.
+- Secure cookies and appropriate HTTP security headers.
+- CSRF protections for state-changing admin operations.
+- Authentication for the admin screen.
+- Redaction of sensitive data from logs.
+- Safe error messages without secrets, stack traces, or internal network details.
+- Dependency auditing.
+
+URL validation alone is insufficient. Enforce outbound network restrictions at the worker or infrastructure layer.
+
+Validate redirects, popups, frames, and browser requests. Never allow the worker to navigate to an internal address merely because it was discovered on the target page.
+
+Do not submit forms or trigger destructive actions on third-party websites.
+
+## 17. Database and Job Lifecycle
+
+Use PostgreSQL with Prisma.
+
+Create models for:
+
+- Anonymous visitors.
+- Scan jobs.
+- Domain identities.
+- Inspected pages.
+- Interaction states.
+- Findings.
+- Evidence references.
+- Repair prompts.
+- Usage reservations.
+- Runtime application settings.
+
+Use job states:
+
+`queued`, `running`, `completed`, `partial`, `failed`, `cancelled`, `unsupported_large_ecommerce`.
+
+Persist enough information to reopen existing reports and enforce quota rules.
+
+Store screenshots and artifacts with retention limits.
+
+Do not retain full HTML unnecessarily. Do not store sensitive form values.
+
+Use database constraints and indexes for quota enforcement, job lookup, and domain deduplication.
+
+A worker must release browser contexts, processes, and resources on success, failure, timeout, or cancellation.
+
+## 18. Required Tests
+
+Create a local fixture website and automated tests.
+
+### Unit tests
+
+- URL normalization.
+- Registrable domain extraction.
+- Canonical URL handling.
+- Filter and sorting parameter classification.
+- Meaningful-page deduplication.
+- Standard 10-page limit.
+- E-commerce 20-page limit.
+- Large-store detection.
+- SSRF and redirect validation.
+- Quota-window calculations.
+- Atomic reservation logic.
+- Finding deduplication.
+- GLM output validation.
+- Repair prompt generation.
+
+### AJAX and SPA tests
+
+The fixture must include:
+
+- A normal link.
+- A broken internal link.
+- A button with a deterministic state change.
+- A filter that updates content asynchronously without full-page navigation.
+- A sort control.
+- A debounced search input.
+- A loading indicator.
+- A delayed response.
+- A failed AJAX request.
+- A history-based SPA route.
+- A product variant selector.
+- A broken image.
+- A form with client-side validation.
+- A responsive overflow issue.
+- Basic SEO metadata.
+
+Verify that:
+
+- AJAX interactions are tested without consuming additional page slots.
+- Loading waits are bounded.
+- Delayed but successful interactions are not automatically reported as broken.
+- Unrelated third-party or analytics errors are not automatically reported as defects.
+- Genuine failures are recorded with reproducible evidence.
+- The crawler does not loop indefinitely on pagination, filters, or infinite scrolling.
+
+### E-commerce tests
+
+Create fixtures for:
+
+1. A small store with a homepage, categories, and products.
+2. A medium store that fits within 20 meaningful pages.
+3. A large store that exceeds a configurable threshold.
+4. Product filters that change query parameters.
+5. Product sorting that changes results asynchronously.
+
+Verify that the first two stores respect the 20-page cap, interaction states do not consume page slots, and the large store receives the correct unsupported status without a deep crawl.
+
+### Quota and admin tests
+
+Verify:
+
+- The eleventh distinct domain is blocked during the active window.
+- A new domain becomes available after the window expires.
+- The same domain cannot be rescanned during the active window.
+- Existing reports can be reopened.
+- Different paths on the same domain do not bypass quotas.
+- Concurrent requests cannot reserve more slots than allowed.
+- The admin can change quotas and page limits at runtime.
+- The emergency kill switch blocks new scans.
+- Large-store rejection does not consume a completed-scan quota slot.
+- Infrastructure failures before scanning starts release reservations correctly.
+
+### Release checks
+
+Run and fix:
+
+- Unit tests.
+- Integration tests.
+- End-to-end tests.
+- Lint.
+- Type checking.
+- Production build.
+- Database migration checks.
+
+Never use real third-party websites as required automated-test dependencies.
+
+## 19. Deployment Deliverables
+
+Provide:
+
+- Complete source code.
+- Dockerfiles.
+- Docker Compose for application, worker, PostgreSQL, and Redis.
+- Database migrations.
+- `.env.example` with placeholders only.
+- README with setup and deployment instructions.
+- Production HTTPS and secure-cookie guidance.
+- Worker health checks and graceful shutdown.
+- Structured logs without secrets.
+- Backup and data-retention documentation.
+- Instructions for configuring GLM.
+- Instructions for changing quotas and page limits.
+- Instructions for emergency shutdown.
+- A list of tests actually run and their results.
+- A list of remaining production prerequisites.
+
+Do not commit API keys, passwords, real user data, or generated secrets.
+
+Do not choose an open-source license without explicit approval.
+
+## 20. Execution Order
+
+1. Inspect the repository and report its existing structure.
+2. Implement configuration, database schema, and migrations.
+3. Implement visitor identity, quotas, and emergency controls.
+4. Implement URL validation and SSRF protections.
+5. Build the isolated worker and scan queue.
+6. Implement page discovery and meaningful-page counting.
+7. Implement e-commerce detection, 20-page limits, and large-store handling.
+8. Implement Playwright checks and AJAX/SPA behavior.
+9. Integrate Lighthouse.
+10. Integrate the single GLM model.
+11. Build the Arabic RTL chat, progress, report, and repair prompt interfaces.
+12. Implement the protected admin settings screen.
+13. Add fixture websites and automated tests.
+14. Run all checks and fix failures.
+15. Complete deployment documentation.
+
+If a credential or external service is unavailable, implement the integration and document the missing configuration. Do not fabricate successful results.
+
+Do not stop after scaffolding or after presenting an implementation plan.
+
+## Final Definition of Done
+
+The MVP is ready for a controlled production deployment only when:
+
+- Standard sites are limited to 10 unique meaningful pages per scan.
+- Supported small and medium e-commerce sites are limited to 20 unique meaningful pages per scan.
+- Filters, sorting, variants, pagination states, and AJAX updates do not inflate the meaningful-page count.
+- Large e-commerce stores are detected using configurable thresholds and receive a clear unsupported notice.
+- Free usage is limited to 10 distinct domains per visitor per rolling 9-hour window by default.
+- Admin settings can change limits and disable scanning.
+- The emergency override always blocks new scans.
+- AJAX and SPA interactions use bounded, condition-based waits.
+- Findings are evidence-backed and not invented by the LLM.
+- Repair prompts are copyable and actionable.
+- SSRF protections and worker isolation are implemented and tested.
+- Automated tests, lint, type checking, and the production build pass.
+- Deployment instructions are complete.
+- Remaining limitations are clearly documented.
+
+**Final priority: Build a small, reliable, safe, useful website reviewer. Focus on real frontend problems, correct page counting, robust AJAX handling, controlled e-commerce support, and practical repair prompts. Do not add voice, automatic code repair, authentication support for target websites, or anti-bot bypassing to this MVP.**

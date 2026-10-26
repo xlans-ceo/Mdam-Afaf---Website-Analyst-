@@ -1,11 +1,85 @@
-<div align="center">
+# مدام عفاف — دفتر مراجعة المواقع بالدليل (Madam Afaf)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+تطبيق ويب لمراجعة وفحص المواقع الإلكترونية باللهجة المصرية الودودة، مصمم لأصحاب المشاريع وغير التقنيين الذين يستلمون مواقعهم من شركات برمجة، مستقلين (Freelancers)، أو أدوات بناء بالذكاء الاصطناعي، ويريدون رأيًا مستقلًا مبنيًا على الدليل الملموس بدل التخمين.
 
-  <h1>Built with AI Studio</h2>
+---
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## المبادئ الأساسية والقدرات الفعلية
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+1. **الفحص الفعلي بالدليل (`LiveProvider`):**
+   - فحص حالة الموقع أولًا (`maintenance_or_coming_soon`، `blocked_by_protection`، `parked_or_default_page`، `auth_wall`، `redirected_elsewhere`، `unreachable`، `non_html`) وإصدار تقرير حالة صريح بدل تقييم مضلل.
+   - اكتشاف المنصة وأداة البناء (WordPress، Elementor، Shopify، Wix، Webflow، Squarespace، أو تطبيقات الـ SPA مثل React/Vite/Next.js) وتكييف خطوات الإصلاح حسب المنصة الفعلية.
+   - تحليل الـ DOM الفعلي (`node-html-parser` في `src/lib/html-dom.ts`) لتحديد مكان كل ملاحظة بدقة (`الهيدر`، `القايمة`، `الفوتر`، `المحتوى الرئيسي` + أقرب عنوان)، مع دمج العناصر المتكررة في القالب المشترك (`scope: 'site-wide'`) لعدم تضخيم الأعداد عبر الصفحات.
+   - اكتشاف حتى **10 صفحات** أساسية لكل فحص (`MAX_PAGES_PER_SCAN=10`) مع احترام `robots.txt` واستبعاد صفحات السلة والدفع والحسابات الشخصية والروابط الخارجية.
 
-</div>
+2. **حصة الاستخدام العادلة لكل زائر ولكل موقع (`Visitor + Domain Quota`):**
+   - الحصة معزولة لكل زائر ولكل نطاق جذري (`${visitorHash}:${rootDomain}`): **10 صفحات لكل 10 ساعات** لكل (زائر، نطاق).
+   - حجز الصفحات المتبقية يتم ذريًا عند بدء الفحص (`reserveScan`)، وأي فحص يفشل أو يُلغى أو يتوقف أو ينتهي كـ `status-only` يحرر الحجز فورًا (`releaseReservation`) دون خصم من رصيد الزائر.
+   - نقطة النهاية `GET /api/quota?domain=<d>` تُرجع حالة الحصة الفعلية لهذا الزائر وهذا النطاق (`{ pagesUsed, pagesRemaining, resetAt, exhausted }`).
+
+3. **حماية صارمة ضد SSRF وتأمين التقارير ومفاتيح البيئة:**
+   - فحص عناوين الـ IP قبل الاتصال وبعد كل إعادة توجيه (`Redirect`) لمنع الوصول إلى الشبكات الداخلية أو الـ Loopback أو عناوين الـ Cloud Metadata (`169.254.169.254`).
+   - هوية الزائر تُخزن مُعمّاة (`HMAC-SHA256` باستخدام `VISITOR_ID_SALT`). في بيئة الإنتاج (`NODE_ENV=production`) يجب ألا يقل `VISITOR_ID_SALT` عن **32 حرفًا** وإلا يرفض الخادم البدء. **تنبيه مهم:** تغيير قيمة `VISITOR_ID_SALT` لاحقًا يؤدي إلى فصل (Orphan) جميع التقارير المحفوظة وسجلات الحصص السابقة لأن بصمة الزائر تتغير.
+   - روابط المشاركة القابلة للإلغاء (`DELETE /api/scans/:id/share`) تُخزن مُعمّاة (`SHA-256`) وتُرجع نسخة مُنقاة (Allowlist DTO) خالية من أي بيانات حساسة مع `Cache-Control: no-store`.
+
+4. **الشفافية فيما لم يُقَس (`NOT_MEASURED`) وقياسات PageSpeed Insights (`PSI_API_KEY`):**
+   - الفحص يعتمد على كود الـ HTML الثابت وبيانات الـ HTTP ونتائج Google PageSpeed Insights v5 (عند توفر `PSI_API_KEY` على الخادم).
+   - القياسات المعملية التي لا يصاحبها سجل زوار حقيقي (CrUX Field Data) تُوسم بصراحة: **«قياس معملي من جوجل (محاكاة موبايل بطيء)»** ولا تتجاوز درجة خطورتها `medium`.
+   - الفحوصات التي تتطلب متصفحًا تفاعليًا حقيقيًا (مثل قياس التمرير الأفقي الفعلي على الموبايل أو الضغط على أزرار تغيير اللغة المعتمدة على JavaScript) تُذكر بصراحة تحت قسم **"ما اتقاسش"** ولا يتم تخمينها أبدًا.
+
+---
+
+## التشغيل والاختبار وفحص الإعدادات
+
+### 1. تشغيل التطبيق في بيئة التطوير
+```bash
+npm run dev
+```
+يعمل الخادم والواجهة على: `http://localhost:3000`
+
+### 2. فحص متغيرات البيئة (بدون طباعة أي قيم سرية)
+```bash
+npm run config:check
+```
+
+### 3. تشغيل الاختبارات وفحص الكود والبناء وفحص الجاهزية
+```bash
+npm test                # تشغيل 236+ اختبار سلوكي انحداري
+npm run lint            # فحص TypeScript الخالي من الأخطاء
+npm run build           # بناء حزمة الإنتاج
+npm run check:bundle    # التحقق من عزل المفاتيح عن المتصفح
+npm run preflight       # فحص الجاهزية الصارم (GO/NO-GO) للإطلاق
+npm run smoke           # فحص الدخان المباشر على الخادم
+npm run feedback:report # تقرير التقييمات والملاحظات للإدارة (Admin)
+```
+
+---
+
+## الإصدار الحالي: v0.1.0-alpha.1 (Alpha)
+- **مرحلة الإطلاق:** نسخة تجريبية مغلقة (Alpha).
+- **التخزين:** FileStore (غير دائم - مع تنبيه صريح).
+- **الصفحات القانونية:** `/privacy` (سياسة الخصوصية) و `/terms` (شروط الاستخدام) بمسودة استرشادية واضحة.
+- **حلقة إعادة الفحص (Re-Scan Loop):** مقارنة ذكية بالبصمة قبل وبعد، وحساب دقيق للفروقات المعملية دون استهلاك رصيد الصفحات.
+- **لوحة الإدارة للقراءة فقط:** محمية بـ `ADMIN_TOKEN` مع مقارنة متساوية الزمن `crypto.timingSafeEqual` وعزل `noindex`.
+
+## حالة التخزين والاستمرارية (`Persistence: non-durable`)
+
+- **الوضع الحالي (`FileStore` — `non-durable`):**
+  - يعتمد الخادم حاليًا على التخزين المحلي في ملف `data/store.json` (بكتابة ذرية عبر ملف مؤقت ثم `rename` مع نسخ احتياطي تلقائي للملفات التالفة `store.corrupt.<ts>.json`).
+  - **تنبيه التشغيل:** يوصى بتشغيل نسخة واحدة (Single Instance) لضمان اتساق الملف المحلي في بيئات الحاويات والسيرفرلس.
+  - نقطة النهاية `GET /api/health` تُرجع صراحةً:
+    ```json
+    {
+      "persistence": {
+        "adapter": "file",
+        "mode": "non-durable",
+        "durable": false,
+        "lastWriteOk": true
+      }
+    }
+    ```
+  - **سبب عدم تفعيل `Firestore` بوضع Server-Side Admin SDK في هذه البيئة (`K3.1`):**
+    1. تم إنشاء مشروع Firebase (`gen-lang-client-0691033706`) وقاعدة بيانات Firestore (`ai-studio-madamafafaiwebsi-b02246aa-58c1-4ebf-acd3-7c6103cac022`) ونشر قواعد الحماية الصارمة في `firestore.rules` (`allow read, write: if false;`) لمنع أي وصول مباشر من المتصفح التزامًا بالقسم 10.
+    2. عند اختبار الوصول من الخادم فقط عبر حساب الخدمة الافتراضي للحاوية (Application Default Credentials / Metadata Server)، ردّت واجهة Firestore بـ `HTTP 403 PERMISSION_DENIED (Missing or insufficient permissions)` لأن حاوية التشغيل تعمل تحت مشروع مضيف منفصل ولا يتوفر متغير `GOOGLE_APPLICATION_CREDENTIALS` لمفتاح حساب خدمة بصلاحية `roles/datastore.user` على مشروع Firebase.
+    3. التزامًا بمبدأ عدم التزييف (`Do not fake it`)، لم يتم فتح قواعد `firestore.rules` للعميل ولم يتم الادعاء بأن التخزين سحابي دائم، وبقي التخزين على `FileStore` موسومًا بوضوح كـ `non-durable`.
+

@@ -1,0 +1,121 @@
+{
+  "benchmarkDate": "2026-10-26T11:58:18.458Z",
+  "nodeVersion": "v22.23.3",
+  "phase": "B4_RELEASE_ALPHA",
+  "scenarios": [
+    {
+      "scenario": "fast_site",
+      "url": "http://127.0.0.1:59336/fixtures/fast",
+      "wallClockMs": 593,
+      "status": "completed",
+      "pagesInspected": 1,
+      "findingsCount": 4,
+      "verdictLevel": "needs_work_before_launch",
+      "notes": "siteStatus: ok"
+    },
+    {
+      "scenario": "slow_site_3s",
+      "url": "http://127.0.0.1:59336/fixtures/slow",
+      "wallClockMs": 3239,
+      "status": "completed",
+      "pagesInspected": 1,
+      "findingsCount": 5,
+      "verdictLevel": "fix_before_handover",
+      "notes": "siteStatus: ok"
+    },
+    {
+      "scenario": "no_headers",
+      "url": "http://127.0.0.1:59336/fixtures/no-headers",
+      "wallClockMs": 25001,
+      "status": "failed_or_timeout",
+      "pagesInspected": 0,
+      "findingsCount": 0,
+      "notes": "BENCH_TEST_TIMEOUT: exceeded 25s test harness safety timeout"
+    },
+    {
+      "scenario": "stalled_body",
+      "url": "http://127.0.0.1:59336/fixtures/stall-body",
+      "wallClockMs": 25002,
+      "status": "failed_or_timeout",
+      "pagesInspected": 0,
+      "findingsCount": 0,
+      "notes": "BENCH_TEST_TIMEOUT: exceeded 25s test harness safety timeout"
+    },
+    {
+      "scenario": "large_50mb",
+      "url": "http://127.0.0.1:59336/fixtures/large-50mb",
+      "wallClockMs": 1299,
+      "status": "completed",
+      "pagesInspected": 1,
+      "findingsCount": 6,
+      "verdictLevel": "fix_before_handover",
+      "notes": "siteStatus: ok"
+    },
+    {
+      "scenario": "redirect_chain_exceeded",
+      "url": "http://127.0.0.1:59336/fixtures/redirect-chain/1",
+      "wallClockMs": 1257,
+      "status": "completed",
+      "pagesInspected": 1,
+      "findingsCount": 0,
+      "verdictLevel": "status_only",
+      "notes": "siteStatus: empty_response"
+    },
+    {
+      "scenario": "img_pointing_private_ip",
+      "url": "http://127.0.0.1:59336/fixtures/private-img",
+      "wallClockMs": 502,
+      "status": "completed",
+      "pagesInspected": 1,
+      "findingsCount": 5,
+      "verdictLevel": "fix_before_handover",
+      "notes": "siteStatus: ok"
+    },
+    {
+      "scenario": "ten_pages_failing_sitemap",
+      "url": "http://127.0.0.1:59336/fixtures/ten-pages",
+      "wallClockMs": 2760,
+      "status": "completed",
+      "pagesInspected": 10,
+      "findingsCount": 5,
+      "verdictLevel": "fix_before_handover",
+      "notes": "siteStatus: ok"
+    },
+    {
+      "scenario": "psi_unavailable",
+      "url": "http://127.0.0.1:59336/fixtures/psi-unavailable",
+      "wallClockMs": 485,
+      "status": "completed",
+      "pagesInspected": 1,
+      "findingsCount": 5,
+      "verdictLevel": "fix_before_handover",
+      "notes": "siteStatus: ok"
+    }
+  ],
+  "concurrency": [
+    {
+      "concurrent": 1,
+      "totalWallClockMs": 751,
+      "avgPerScanMs": 751,
+      "successCount": 1
+    },
+    {
+      "concurrent": 3,
+      "totalWallClockMs": 253,
+      "avgPerScanMs": 84,
+      "successCount": 3
+    },
+    {
+      "concurrent": 10,
+      "totalWallClockMs": 257,
+      "avgPerScanMs": 26,
+      "successCount": 10
+    },
+    {
+      "concurrent": 30,
+      "totalWallClockMs": 268,
+      "avgPerScanMs": 9,
+      "successCount": 30
+    }
+  ]
+}

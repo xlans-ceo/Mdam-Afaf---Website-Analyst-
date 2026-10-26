@@ -1,0 +1,308 @@
+[
+  {
+    "id": 1,
+    "userQuestion": "أبدأ بإيه الأول في تصليح الموقع؟",
+    "mockReport": {
+      "registrableDomain": "example.com",
+      "findings": [
+        { "id": "f1", "ruleId": "R013", "category": "performance", "severity": "critical", "titleAr": "بطء شديد في ظهور المحتوى الرئيسي LCP", "url": "https://example.com" },
+        { "id": "f2", "ruleId": "R010", "category": "security", "severity": "medium", "titleAr": "غياب ترويسات الأمان", "url": "https://example.com" }
+      ]
+    },
+    "expectedTopic": "الأولويات",
+    "mustContain": ["LCP", "بطء"]
+  },
+  {
+    "id": 2,
+    "userQuestion": "يعني إيه LCP وطلع عندي 6 ثواني؟",
+    "mockReport": {
+      "registrableDomain": "shop-eg.com",
+      "findings": [{ "id": "f1", "ruleId": "R013", "category": "performance", "severity": "high", "titleAr": "LCP بطيء", "url": "https://shop-eg.com" }]
+    },
+    "expectedTopic": "LCP",
+    "mustContain": ["LCP", "عنصر"]
+  },
+  {
+    "id": 3,
+    "userQuestion": "عندي روابط مكسورة 404؟",
+    "mockReport": {
+      "registrableDomain": "blog.com",
+      "findings": [{ "id": "f1", "ruleId": "R002", "category": "links", "severity": "high", "titleAr": "رابط مكسور 404", "url": "https://blog.com/about" }]
+    },
+    "expectedTopic": "الروابط",
+    "mustContain": ["404", "الرابط"]
+  },
+  {
+    "id": 4,
+    "userQuestion": "فين الصور اللي مفيهاش alt؟",
+    "mockReport": {
+      "registrableDomain": "store.com",
+      "findings": [{ "id": "f1", "ruleId": "R011", "category": "accessibility", "severity": "medium", "titleAr": "صور بدون نص بديل", "url": "https://store.com" }]
+    },
+    "expectedTopic": "النص البديل",
+    "mustContain": ["بديل"]
+  },
+  {
+    "id": 5,
+    "userQuestion": "ليه مفيش ترويسات أمان؟",
+    "mockReport": {
+      "registrableDomain": "bank-eg.com",
+      "findings": [{ "id": "f1", "ruleId": "R010", "category": "security", "severity": "high", "titleAr": "غياب ترويسات الأمان", "url": "https://bank-eg.com" }]
+    },
+    "expectedTopic": "الأمان",
+    "mustContain": ["أمان"]
+  },
+  {
+    "id": 6,
+    "userQuestion": "عايز برومبت الإصلاح الشامل للمطور",
+    "mockReport": {
+      "registrableDomain": "factory.com",
+      "masterRepairPrompt": "# خطة إصلاح موقع factory.com\n- أصلح LCP\n- أضف ترويسات الأمان",
+      "findings": []
+    },
+    "expectedTopic": "البرومبت",
+    "mustContain": ["خطة", "الإصلاح"]
+  },
+  {
+    "id": 7,
+    "userQuestion": "الموقع شغال كويس على الموبايل؟",
+    "mockReport": {
+      "registrableDomain": "agency.com",
+      "findings": [{ "id": "f1", "ruleId": "R012", "category": "responsive", "severity": "high", "titleAr": "تمرير أفقي على شاشات الموبايل", "url": "https://agency.com" }]
+    },
+    "expectedTopic": "الموبايل",
+    "mustContain": ["الموبايل"]
+  },
+  {
+    "id": 8,
+    "userQuestion": "موقعي ووردبريس، أصلح الملاحظات إزاي؟",
+    "mockReport": {
+      "registrableDomain": "wp-site.com",
+      "findings": []
+    },
+    "expectedTopic": "ووردبريس",
+    "mustContain": ["ووردبريس"]
+  },
+  {
+    "id": 9,
+    "userQuestion": "موقعي شوبيفاي، أقدر أعدل الأكواد؟",
+    "mockReport": {
+      "registrableDomain": "myshopify-store.com",
+      "findings": []
+    },
+    "expectedTopic": "شوبيفاي",
+    "mustContain": ["شوبيفاي"]
+  },
+  {
+    "id": 10,
+    "userQuestion": "ليه المراجعة طلعت جزئية لموقع React؟",
+    "mockReport": {
+      "registrableDomain": "spa-app.com",
+      "notMeasured": [{ "id": "spa_render", "titleAr": "عرض جافاسكريبت داخل المتصفح" }],
+      "findings": []
+    },
+    "expectedTopic": "SPA",
+    "mustContain": ["ما اتقاسّتش", "React"]
+  },
+  {
+    "id": 11,
+    "userQuestion": "إيه اللي ما اتقاسش في الفحص؟",
+    "mockReport": {
+      "registrableDomain": "portal.com",
+      "notMeasured": [{ "id": "overflow", "titleAr": "التمرير الأفقي الفعلي" }],
+      "findings": []
+    },
+    "expectedTopic": "ما اتقاسش",
+    "mustContain": ["ما اتقاسّتش"]
+  },
+  {
+    "id": 12,
+    "userQuestion": "أداة الذكاء الاصطناعي قالتلي موقعك 100% سليم",
+    "mockReport": {
+      "registrableDomain": "ai-made.com",
+      "findings": [{ "id": "f1", "ruleId": "R013", "category": "performance", "severity": "critical", "titleAr": "LCP بطيء 7 ثواني", "url": "https://ai-made.com" }]
+    },
+    "expectedTopic": "وعود الـ AI",
+    "mustContain": ["الدليل"]
+  },
+  {
+    "id": 13,
+    "userQuestion": "إيه الفرق بين الملاحظة الحرجة والمتوسطة؟",
+    "mockReport": {
+      "registrableDomain": "test.com",
+      "findings": []
+    },
+    "expectedTopic": "الخطورة",
+    "mustContain": ["الحرجة"]
+  },
+  {
+    "id": 14,
+    "userQuestion": "ممكن تديني سكور من 100 لموقعي؟",
+    "mockReport": {
+      "registrableDomain": "test.com",
+      "findings": []
+    },
+    "expectedTopic": "الدرجة المئوية",
+    "mustContain": ["الدرجات", "الدليل"]
+  },
+  {
+    "id": 15,
+    "userQuestion": "عندي كام فحص متبقي في حسابي؟",
+    "mockReport": {
+      "registrableDomain": "test.com",
+      "findings": []
+    },
+    "expectedTopic": "الكوتة",
+    "mustContain": ["فحص", "ساعات"]
+  },
+  {
+    "id": 16,
+    "userQuestion": "إزاي أشارك التقرير ده مع شريكي؟",
+    "mockReport": {
+      "registrableDomain": "test.com",
+      "findings": []
+    },
+    "expectedTopic": "المشاركة",
+    "mustContain": ["مشاركة", "الرابط"]
+  },
+  {
+    "id": 17,
+    "userQuestion": "أنا مش مبرمج، إيه اللي أقدر أعدله بنفسي؟",
+    "mockReport": {
+      "registrableDomain": "test.com",
+      "findings": []
+    },
+    "expectedTopic": "CMS",
+    "mustContain": ["لوحة", "المحتوى"]
+  },
+  {
+    "id": 18,
+    "userQuestion": "يعني إيه فحص معملي؟",
+    "mockReport": {
+      "registrableDomain": "test.com",
+      "findings": []
+    },
+    "expectedTopic": "معملي",
+    "mustContain": ["معملي", "جوجل"]
+  },
+  {
+    "id": 19,
+    "userQuestion": "ملف robots.txt ده بيعمل إيه؟",
+    "mockReport": {
+      "registrableDomain": "test.com",
+      "findings": []
+    },
+    "expectedTopic": "robots.txt",
+    "mustContain": ["محركات", "البحث"]
+  },
+  {
+    "id": 20,
+    "userQuestion": "ليه لما بنشر اللينك على فيسبوك مش بيظهر صورة؟",
+    "mockReport": {
+      "registrableDomain": "news.com",
+      "findings": [{ "id": "f1", "ruleId": "R006", "category": "seo", "severity": "medium", "titleAr": "غياب وسوم Open Graph", "url": "https://news.com" }]
+    },
+    "expectedTopic": "Open Graph",
+    "mustContain": ["Open Graph", "صورة"]
+  },
+  {
+    "id": 21,
+    "userQuestion": "يعني إيه حقل الإدخال ناقصه label؟",
+    "mockReport": {
+      "registrableDomain": "forms.com",
+      "findings": [{ "id": "f1", "ruleId": "R011", "category": "accessibility", "severity": "medium", "titleAr": "حقول نموذج بدون تسمية", "url": "https://forms.com" }]
+    },
+    "expectedTopic": "label",
+    "mustContain": ["label", "النموذج"]
+  },
+  {
+    "id": 22,
+    "userQuestion": "تباين الألوان معناه إيه؟",
+    "mockReport": {
+      "registrableDomain": "palette.com",
+      "findings": [{ "id": "f1", "ruleId": "R011", "category": "accessibility", "severity": "low", "titleAr": "تباين ألوان ضعيف", "url": "https://palette.com" }]
+    },
+    "expectedTopic": "التباين",
+    "mustContain": ["الخلفية", "القراءة"]
+  },
+  {
+    "id": 23,
+    "userQuestion": "وسم viewport بيعمل إيه في كود الصفحة؟",
+    "mockReport": {
+      "registrableDomain": "mob.com",
+      "findings": []
+    },
+    "expectedTopic": "viewport",
+    "mustContain": ["viewport", "الشاشة"]
+  },
+  {
+    "id": 24,
+    "userQuestion": "يعني إيه زمن أول بايت TTFB؟",
+    "mockReport": {
+      "registrableDomain": "server.com",
+      "findings": [{ "id": "f1", "ruleId": "R013", "category": "performance", "severity": "medium", "titleAr": "بطء استجابة السيرفر TTFB", "url": "https://server.com" }]
+    },
+    "expectedTopic": "TTFB",
+    "mustContain": ["بايت", "السيرفر"]
+  },
+  {
+    "id": 25,
+    "userQuestion": "إزاي أحفظ التقرير PDF؟",
+    "mockReport": {
+      "registrableDomain": "pdf-site.com",
+      "findings": []
+    },
+    "expectedTopic": "PDF",
+    "mustContain": ["طباعة", "PDF"]
+  },
+  {
+    "id": 26,
+    "userQuestion": "إزاي أعرف إيه اللي اتصلح في إعادة الفحص؟",
+    "mockReport": {
+      "registrableDomain": "rescan-site.com",
+      "findings": []
+    },
+    "expectedTopic": "إعادة الفحص",
+    "mustContain": ["مقارنة", "اتحلت"]
+  },
+  {
+    "id": 27,
+    "userQuestion": "ليه زرار الواتساب مهم في أعلى الصفحة؟",
+    "mockReport": {
+      "registrableDomain": "sales.com",
+      "findings": [{ "id": "f1", "ruleId": "RC008", "category": "content", "severity": "medium", "titleAr": "غياب مسار التحويل السريع في أعلى الصفحة", "url": "https://sales.com" }]
+    },
+    "expectedTopic": "الواتساب",
+    "mustContain": ["تواصل", "العميل"]
+  },
+  {
+    "id": 28,
+    "userQuestion": "زرار الإبهام 👍 و 👎 بيعمل إيه؟",
+    "mockReport": {
+      "registrableDomain": "feedback-site.com",
+      "findings": []
+    },
+    "expectedTopic": "التقييم",
+    "mustContain": ["دقة", "الملاحظة"]
+  },
+  {
+    "id": 29,
+    "userQuestion": "ليه الفحص بياخد 10 صفحات بس مش كل الموقع؟",
+    "mockReport": {
+      "registrableDomain": "big-site.com",
+      "findings": []
+    },
+    "expectedTopic": "حد الصفحات",
+    "mustContain": ["عينة", "صفحات"]
+  },
+  {
+    "id": 30,
+    "userQuestion": "إزاي أتأكد بنفسي من الملاحظة قبل ما أكلم المطور؟",
+    "mockReport": {
+      "registrableDomain": "verify.com",
+      "findings": [{ "id": "f1", "ruleId": "R011", "category": "accessibility", "severity": "medium", "titleAr": "حقول بدون تسمية", "url": "https://verify.com/contact" }]
+    },
+    "expectedTopic": "التحقق الذاتي",
+    "mustContain": ["الدليل", "بنفسك"]
+  }
+]
